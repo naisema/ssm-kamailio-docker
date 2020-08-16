@@ -1,0 +1,24 @@
+FROM debian:buster
+
+LABEL maintainer="suwat_sai@hotmail.com"
+
+# Update system and install kamailio
+RUN apt-get update \
+&& apt-get -y install git-core gcc g++ flex bison make autoconf libssl-dev libcurl4-openssl-dev libxml2-dev libpcre3-dev \
+&& mkdir -p /usr/local/src/kamailio-5.3 \
+&& cd /usr/local/src/kamailio-5.3 \
+&& git clone --depth 1 --no-single-branch https://github.com/kamailio/kamailio kamailio \
+&& cd kamailio \
+&& git checkout -b 5.3 origin/5.3 \
+&& make include_modules="" cfg \
+&& make all \
+&& make install \
+&& rm -rf /usr/local/src/kamailio-5.3 \
+&& rm -rf /var/lib/apt/lists/*
+
+VOLUME /usr/local/etc/kamailio
+
+# clean
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["kamailio", "-DD", "-E"]
